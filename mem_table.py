@@ -1,5 +1,6 @@
 from b_tree import BTree
 from point import Point
+from bloom_filter import MTableBloomFilter
 
 MAXSIZE = 100
 BTREE_NODE_SIZE = 8
