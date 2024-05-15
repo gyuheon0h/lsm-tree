@@ -23,7 +23,7 @@ class BTree:
         if self.root is not None:
             self._traverse(self.root)
 
-    def _traverse(self, node):
+    def _traverse(self, node: BTreeNode):
         i = 0
         for i in range(len(node.points)):
             if not node.leaf:
@@ -36,7 +36,7 @@ class BTree:
         with open(file_path, 'a') as file:
             self._flush_to_file(self.root, file)
 
-    def _flush_to_file(self, node, file):
+    def _flush_to_file(self, node: BTreeNode, file):
         if node is None:
             return
         i = 0
@@ -60,7 +60,7 @@ class BTree:
             return None
         return self._search(node.children[i], key)
 
-    def insert(self, point):
+    def insert(self, point: Point):
         if self.root is None:
             self.root = BTreeNode(self.t, True)
             self.root.points.append(point)
@@ -75,7 +75,7 @@ class BTree:
                 self._insert_non_full(self.root, point)
         self.size += 1
 
-    def _insert_non_full(self, node, point):
+    def _insert_non_full(self, node: BTreeNode, point: Point):
         i = len(node.points) - 1
         if node.leaf:
             node.points.append(None)  # Append a dummy value to expand the list
@@ -93,7 +93,7 @@ class BTree:
                     i += 1
             self._insert_non_full(node.children[i], point)
 
-    def _split_child(self, parent, i):
+    def _split_child(self, parent: BTreeNode, i):
         t = self.t
         y = parent.children[i]
         z = BTreeNode(t, y.leaf)

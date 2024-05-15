@@ -12,25 +12,19 @@ def hash_function_factory(m, seed=0):
 def round_up_to_power_of_two(num):
     if num <= 0:
         return 1
-    # Check if num is already a power of two
     if (num & (num - 1)) == 0:
         return num
-    # Find the position of the most significant bit (MSB) in num
     msb_position = 0
     while num > 0:
         num >>= 1
         msb_position += 1
-    # Set all lower bits to 1 to create the next power of two
     rounded_num = 1 << msb_position
     return rounded_num
 
 class MTableBloomFilter:
     def __init__(self, n, fp_rate=None, r=None):
-        # number of expected items to store
         self.n = n
-        # calculate k 
         self.k = (0.7 * r) // self.n if r else int(math.log(fp_rate, 0.618) * math.log(2))
-        # calculate bitarray size
         self.r = r if r else round_up_to_power_of_two(int(math.log(fp_rate, 0.618) * self.n))
 
         self.hash_array = bitarray(self.r)
