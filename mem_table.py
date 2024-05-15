@@ -8,20 +8,28 @@ BTREE_NODE_SIZE = 8
 class Memtable:
     def __init__(self):
         self.map = BTree(t=BTREE_NODE_SIZE)
-        self.bloom_filter = MTableBloomFilter(n=MAXSIZE, fp_rate=0.001, r=MAXSIZE*2)
+        # existence check across both memory and disk
+        self.bloom_filter = MTableBloomFilter(n=MAXSIZE*10, fp_rate=0.001, r=MAXSIZE*2)
+        self.file_id = 0
 
     def insert(self, point: Point):
+        # TODO: HOW TO DEDUPE POINTS ACROSS BOTH MEMTABLE AND DISK? Currently only deduping on memory
         if self.map.size == MAXSIZE:
-            self.flush("disk.txt")
+            self.flush(f"file_{self.file_id}.txt")
+            self.file_id += 1
             del self.map
             self.map = BTree(t=BTREE_NODE_SIZE)
+        
+        if self.bloom_filter.test(point.get_key()):
+            if self.map.search(point.get_key()) is not None:
+                print(f"Key: {point.get_key()} already exists in memory")
+                return
+        
         self.map.insert(point=point)
         self.bloom_filter.insert(key=point.get_key())
 
     def flush(self, file_path):
         self.map.flush(file_path=file_path)
-        del self.bloom_filter
-        self.bloom_filter = MTableBloomFilter(n=MAXSIZE,fp_rate=0.001, r=MAXSIZE*2)
 
     def search(self, key):
         check_filter = self.bloom_filter.test(key)
@@ -33,7 +41,11 @@ class Memtable:
 
 table = Memtable()
 
-for i in range(201):
+
+import random
+
+for _ in range(1000):
+    i = random.randint(0,100000)
     point = Point(key=i, value=(i, i*2, i/2))
     table.insert(point=point)
 print(table.search(200))
