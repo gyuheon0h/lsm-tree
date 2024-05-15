@@ -45,9 +45,9 @@ table = Memtable()
 
 import random
 
-for _ in range(1000):
+for _ in range(10000):
     i = random.randint(0,1000000)
-    point = Point(key=i, value=(i, i*2, i/2))
+    point = Point(key=i, value=i**2)
     table.insert(point=point)
 print(table.search(200))
 print(table.search(400))
