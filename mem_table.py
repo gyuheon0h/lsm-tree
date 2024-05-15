@@ -22,7 +22,7 @@ class Memtable:
         self.map.flush(file_path=file_path)
         del self.bloom_filter
         self.bloom_filter = MTableBloomFilter(n=MAXSIZE,fp_rate=0.001, r=MAXSIZE*2)
-        
+
     def search(self, key):
         check_filter = self.bloom_filter.test(key)
         if check_filter:
