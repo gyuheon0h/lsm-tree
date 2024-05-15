@@ -1,0 +1,30 @@
+File stream -> Mem_table -> Flushed to disk (SStables)
+
+**SSTable Format**
+
+- The SSTable (Sorted String Table) stores data in a sorted order on disk.
+- Each entry in the SSTable is a key-value pair.
+- The key is typically a unique identifier for the data.
+- The value is the actual data associated with the key, which can be a tuple of numbers or any serializable data structure.
+- The SSTable is immutable once written, making it efficient for read-heavy operations.
+
+
+NAIVE APPROACH
+**Example Entry Format in SSTable:**
+key1: (value1_part1, value1_part2, value1_part3)
+key2: (value2_part1, value2_part2, value2_part3)
+...
+keyN: (valueN_part1, valueN_part2, valueN_part3)
+
+- Each key-value pair is stored on a new line.
+- The key and value are separated by a colon and a space.
+- The values are enclosed in parentheses and separated by commas.
+
+BETTER WAY SHOULD COMPACT
+- Don't write text, should write bytes
+- Shouldnt index by key, we should have file byte offsets
+- Each SSTable block should be 64kb (just to start off with)
+
+Point: (key->value)
+Offset table: Map (key -> offset into SSTable of values)
+Stores values
