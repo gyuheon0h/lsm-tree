@@ -1,8 +1,9 @@
 from b_tree import BTree
 from point import Point
 from bloom_filter import MTableBloomFilter
+from sstable_reader import SSTableReader
 
-MAXSIZE = 1000
+MAXSIZE = 10000
 BTREE_NODE_SIZE = 8
 
 class Memtable:
@@ -15,7 +16,7 @@ class Memtable:
     def insert(self, point: Point):
         # TODO: HOW TO DEDUPE POINTS ACROSS BOTH MEMTABLE AND DISK? Currently only deduping on memory
         if self.map.size == MAXSIZE:
-            self.flush(f"disk/file_{self.file_id}.txt")
+            self.flush(f"disk/file_{self.file_id}.sst")
             self.file_id += 1
             del self.map
             self.map = BTree(t=BTREE_NODE_SIZE)
@@ -24,7 +25,7 @@ class Memtable:
             if self.map.search(point.get_key()) is not None:
                 print(f"Key: {point.get_key()} already exists in memory")
                 return
-            print("Bloom filter false positive")
+            # print("Bloom filter false positive")
         
         self.map.insert(point=point)
         self.bloom_filter.insert(key=point.get_key())
@@ -45,9 +46,15 @@ table = Memtable()
 
 import random
 
-for _ in range(10000):
-    i = random.randint(0,1000000)
+test_key = None
+
+for k in range(14000):
+    i = random.randint(0,10000000)
+    if k == 1:
+        test_key = i
     point = Point(key=i, value=i**2)
     table.insert(point=point)
-print(table.search(200))
-print(table.search(400))
+
+
+reader = SSTableReader(filepath="disk/file_0.sst")
+print(reader.query_key(query_key=test_key))

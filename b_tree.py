@@ -1,4 +1,5 @@
 from point import Point
+from sstable_writer import SSTableWriter
 
 class BTreeNode:
     def __init__(self, t, leaf=False):
@@ -33,19 +34,21 @@ class BTree:
             self._traverse(node.children[i+1])
 
     def flush(self, file_path):
-        with open(file_path, 'a') as file:
-            self._flush_to_file(self.root, file)
+        sstable_path = file_path
+        writer = SSTableWriter(file_path=sstable_path)
+        self._flush_to_file(self.root, writer)
+        writer.write_to_disk()
 
-    def _flush_to_file(self, node: BTreeNode, file):
+    def _flush_to_file(self, node: BTreeNode, writer: SSTableWriter):
         if node is None:
             return
         i = 0
         for i in range(len(node.points)):
             if not node.leaf:
-                self._flush_to_file(node.children[i], file)
-            file.write(f"{node.points[i].get_key()}: {node.points[i].get_value()}\n")
+                self._flush_to_file(node.children[i], writer)
+            writer.add_entry(key=node.points[i].get_key(), value=node.points[i].get_value())
         if not node.leaf:
-            self._flush_to_file(node.children[i + 1], file)
+            self._flush_to_file(node.children[i + 1], writer)
 
     def search(self, key):
         return self._search(self.root, key) if self.root is not None else None
